@@ -195,7 +195,7 @@ $stats = [
             <div class="col-md-4">
                 <div class="stats-card">
                     <div class="stats-number"><?php echo count($stats['semesters']); ?></div>
-                    <div class="stats-label">Семестри</div>
+                    <div class="stats-label">Семестъра</div>
                 </div>
             </div>
         </div>
@@ -293,34 +293,7 @@ $stats = [
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        <?php if (!empty($stats['semesters'])): ?>
-            <div class="card page-header mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-calendar3 me-2"></i>
-                        Преглед по семестри
-                    </h5>
-                    <div class="row">
-                        <?php foreach ($stats['semesters'] as $semester): ?>
-                            <div class="col-md-3 mb-3">
-                                <div class="text-center">
-                                    <div class="semester-badge mb-2"><?php echo $semester; ?> семестър</div>
-                                    <div class="small text-muted">
-                                        <?php
-                                        $semesterDisciplines = array_filter($disciplines, function($d) use ($semester) {
-                                            return $d['semester'] == $semester;
-                                        });
-                                        $semesterCredits = array_sum(array_column($semesterDisciplines, 'credits'));
-                                        echo count($semesterDisciplines) . ' дисциплини, ' . $semesterCredits . ' кредита';
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
+        
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

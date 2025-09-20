@@ -184,6 +184,14 @@ try {
                                     </a>
                                 </div>
                             <?php endif; ?>
+                            <?php if ($userRole === 'admin'): ?>
+                                <div class="col-auto">
+                                    <a href="views/database_admin.php" class="btn btn-dark btn-lg">
+                                        <i class="bi bi-database me-2"></i>
+                                        База данни
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                             <?php if (Auth::hasPermission('view_disciplines')): ?>
                                 <div class="col-auto">
                                     <a href="views/teacher_disciplines.php" class="btn btn-info btn-lg">
