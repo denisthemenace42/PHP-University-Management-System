@@ -193,6 +193,154 @@ class Database
             ];
         }
     }
+    /**
+     * Check if database exists
+     * 
+     * @param string $databaseName
+     * @return bool
+     */
+    public function databaseExists(string $databaseName): bool
+    {
+        try {
+            $result = $this->selectOne(
+                "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?",
+                [$databaseName]
+            );
+            return $result !== false;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Create database if it doesn't exist
+     * 
+     * @param string $databaseName
+     * @param string $charset
+     * @param string $collation
+     */
+    public function createDatabase(string $databaseName, string $charset = 'utf8mb4', string $collation = 'utf8mb4_unicode_ci'): void
+    {
+        if (!$this->databaseExists($databaseName)) {
+            $sql = "CREATE DATABASE `{$databaseName}` CHARACTER SET {$charset} COLLATE {$collation}";
+            $this->executeQuery($sql);
+            error_log("Database created: {$databaseName}");
+        }
+    }
+    
+    /**
+     * Check if table exists
+     * 
+     * @param string $tableName
+     * @return bool
+     */
+    public function tableExists(string $tableName): bool
+    {
+        try {
+            $result = $this->selectOne(
+                "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?",
+                [$tableName]
+            );
+            return $result && $result['count'] > 0;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Get table structure
+     * 
+     * @param string $tableName
+     * @return array
+     */
+    public function getTableStructure(string $tableName): array
+    {
+        try {
+            return $this->select("DESCRIBE `{$tableName}`");
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    /**
+     * Get all tables in current database
+     * 
+     * @return array
+     */
+    public function getAllTables(): array
+    {
+        try {
+            $result = $this->select("SHOW TABLES");
+            $tables = [];
+            foreach ($result as $row) {
+                $tables[] = array_values($row)[0];
+            }
+            return $tables;
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    
+    /**
+     * Drop table if exists
+     * 
+     * @param string $tableName
+     */
+    public function dropTable(string $tableName): void
+    {
+        $sql = "DROP TABLE IF EXISTS `{$tableName}`";
+        $this->executeQuery($sql);
+        error_log("Table dropped: {$tableName}");
+    }
+    
+    /**
+     * Truncate table
+     * 
+     * @param string $tableName
+     */
+    public function truncateTable(string $tableName): void
+    {
+        $sql = "TRUNCATE TABLE `{$tableName}`";
+        $this->executeQuery($sql);
+        error_log("Table truncated: {$tableName}");
+    }
+    
+    /**
+     * Get database version
+     * 
+     * @return string
+     */
+    public function getDatabaseVersion(): string
+    {
+        try {
+            $result = $this->selectOne("SELECT VERSION() as version");
+            return $result ? $result['version'] : 'Unknown';
+        } catch (Exception $e) {
+            return 'Unknown';
+        }
+    }
+    
+    /**
+     * Get database size
+     * 
+     * @return array
+     */
+    public function getDatabaseSize(): array
+    {
+        try {
+            $result = $this->selectOne("
+                SELECT 
+                    ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb,
+                    COUNT(*) AS table_count
+                FROM information_schema.tables 
+                WHERE table_schema = DATABASE()
+            ");
+            return $result ?: ['size_mb' => 0, 'table_count' => 0];
+        } catch (Exception $e) {
+            return ['size_mb' => 0, 'table_count' => 0];
+        }
+    }
+
     public function __destruct()
     {
         $this->close();
