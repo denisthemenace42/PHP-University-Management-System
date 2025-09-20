@@ -32,7 +32,7 @@ class User
             LEFT JOIN departments d ON t.department_id = d.id
             WHERE u.username = ?";
             $user = $this->db->selectOne($sql, [$username]);
-            if ($user && $user['password'] === $password) {
+            if ($user && password_verify($password, $user['password'])) {
                 unset($user['password']);
                 $user['id'] = (int)$user['id'];
                 $user['student_id'] = $user['student_id'] ? (int)$user['student_id'] : null;
@@ -125,13 +125,16 @@ class User
             if ($this->getUserByUsername($data['username'])) {
                 throw new InvalidArgumentException("Username already exists.");
             }
+            // Hash the password before storing
+            $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+            
             $sql = "INSERT INTO {$this->table} (
                 username, password, role, first_name, last_name, 
                 email, phone, student_id, teacher_id
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $params = [
                 $data['username'],
-                $data['password'],
+                $hashedPassword,
                 $data['role'],
                 $data['first_name'] ?? null,
                 $data['last_name'] ?? null,
@@ -169,7 +172,12 @@ class User
             foreach ($data as $field => $value) {
                 if (in_array($field, $allowedFields)) {
                     $updateFields[] = "$field = ?";
-                    $params[] = $value;
+                    // Hash password if it's being updated
+                    if ($field === 'password' && !empty($value)) {
+                        $params[] = password_hash($value, PASSWORD_DEFAULT);
+                    } else {
+                        $params[] = $value;
+                    }
                 }
             }
             if (empty($updateFields)) {
