@@ -1,0 +1,32 @@
+# PHP
+*.log
+*.tmp
+*.cache
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+temp/
+tmp/
+
+# Sensitive files (if any)
+config.local.php
+.env
+
+# Cookie files (these contain session data and shouldn't be versioned)
+cookies.txt
+cookies_admin.txt
