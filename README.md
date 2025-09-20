@@ -253,4 +253,4 @@ phpProject/
 
 **Версия:** 1.0.0  
 **Дата:** <?php echo date('Y-m-d'); ?>  
-**Автор:** University System Team
+
